@@ -16,6 +16,17 @@ def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
 
+def sample_recipe(user, **params):
+    """Create and return sample recipe"""
+    defaults = {
+        'title': 'Sample Recipe',
+        'time': 10
+    }
+    defaults.update(params)
+
+    return Recipe.objects.create(user=user, **defaults)
+
+
 class PublicRecipesApiTest(TestCase):
     """Test publicly availabale API"""
 
@@ -43,8 +54,8 @@ class PrivateRecipesApiTest(TestCase):
 
     def test_retrieve_recipe_list(self):
         """Test retrieving recipe list"""
-        Recipe.objects.create(user=self.user, title='Dinner Salad', time=10)
-        Recipe.objects.create(user=self.user, title='Scrambled eggs', time=15)
+        sample_recipe(user=self.user, title='Dinner Salad', time=10)
+        sample_recipe(user=self.user, title='Scrambled eggs', time=15)
 
         res = self.client.get(RECIPE_URL)
 
@@ -59,10 +70,8 @@ class PrivateRecipesApiTest(TestCase):
             'other@blah.com'
             'testother123'
         )
-        Recipe.objects.create(user=user2, title='Green Eggs', time=5)
-        recipe = Recipe.objects.create(user=self.user,
-                                       title='Omelette',
-                                       time=10)
+        sample_recipe(user=user2, title='Green Eggs', time=5)
+        recipe = sample_recipe(user=self.user, title='Omelette')
 
         res = self.client.get(RECIPE_URL)
 
